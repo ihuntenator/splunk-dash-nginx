@@ -1,7 +1,7 @@
 # splunk-dash-nginx
 
 1. paste in for dashboard
-2. splunk source nginx:access:kv
+2. splunk source nginx:plus:kv
 3. want access.log in this format:
 
 
