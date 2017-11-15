@@ -22,13 +22,24 @@
         <latest>now</latest>
       </search>
     </input>
+    <input type="dropdown" token="site" searchWhenChanged="true">
+      <label>Select a site</label>
+      <choice value="births-internal*">births-internal</choice>
+      <choice value="marriages-internal*">marriages-internal</choice>
+      <choice value="payment-processing*">payment-processing</choice>
+      <choice value="simple-email*">simple-email</choice>
+      <choice value="tiaki*">tiaki</choice>
+      <choice value="*">All</choice>
+      <prefix>site="</prefix>
+      <suffix>"</suffix>
+      <default>*</default>
+      <initialValue>*</initialValue>
+    </input>
     <input type="dropdown" token="nginx_version" searchWhenChanged="true" depends="$justHideMe$">
       <search>
         <query>
           <![CDATA[
-          index=nginx sourcetype=nginx:plus:kv $host$ | fields nginx_version | rex "nginx_version=(?<nginx_version>[^\"]+)" | top nginx_version 
-
-showcount=f showperc=f
+          index=nginx sourcetype=nginx:plus:kv $host$ | fields nginx_version | rex "nginx_version=(?<nginx_version>[^\"]+)" | top nginx_version showcount=f showperc=f
          ]]>
         </query>
       </search>
@@ -42,43 +53,10 @@ showcount=f showperc=f
   </fieldset>
   <row>
     <panel>
-      <title>Response time averages</title>
-      <chart>
-        <search>
-          <query>sourcetype=nginx:plus:kv OR sourcetype=nginx:plus:access $host$ | timechart avg(response_time) as "Response Time"</query>
-          <earliest>$nginx-date-time-range.earliest$</earliest>
-          <latest>$nginx-date-time-range.latest$</latest>
-        </search>
-        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
-        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
-        <option name="charting.axisTitleX.visibility">visible</option>
-        <option name="charting.axisTitleY.visibility">visible</option>
-        <option name="charting.axisTitleY2.visibility">visible</option>
-        <option name="charting.axisX.scale">linear</option>
-        <option name="charting.axisY.scale">linear</option>
-        <option name="charting.axisY2.enabled">0</option>
-        <option name="charting.axisY2.scale">inherit</option>
-        <option name="charting.chart">line</option>
-        <option name="charting.chart.bubbleMaximumSize">50</option>
-        <option name="charting.chart.bubbleMinimumSize">10</option>
-        <option name="charting.chart.bubbleSizeBy">area</option>
-        <option name="charting.chart.nullValueMode">gaps</option>
-        <option name="charting.chart.showDataLabels">none</option>
-        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-        <option name="charting.chart.stackMode">default</option>
-        <option name="charting.chart.style">shiny</option>
-        <option name="charting.drilldown">all</option>
-        <option name="charting.layout.splitSeries">0</option>
-        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
-        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
-        <option name="charting.legend.placement">right</option>
-      </chart>
-    </panel>
-    <panel>
       <title>Request time averages</title>
       <chart>
         <search>
-          <query>index=nginx sourcetype=nginx:plus:kv $host$ | timechart avg(request_time) as "Request Time" span=1m</query>
+          <query>index=nginx sourcetype=nginx:plus:kv $host$ $site$ | timechart avg(request_time) as "Request Time" span=1m</query>
           <earliest>$nginx-date-time-range.earliest$</earliest>
           <latest>$nginx-date-time-range.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -112,13 +90,46 @@ showcount=f showperc=f
         <option name="trellis.size">medium</option>
       </chart>
     </panel>
+    <panel>
+      <title>Response time averages</title>
+      <chart>
+        <search>
+          <query>sourcetype=nginx:plus:kv OR sourcetype=nginx:plus:access $host$ $site$ | timechart avg(response_time) as "Response Time"</query>
+          <earliest>$nginx-date-time-range.earliest$</earliest>
+          <latest>$nginx-date-time-range.latest$</latest>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
   </row>
   <row>
     <panel>
       <title>HTTP status codes</title>
       <chart>
         <search>
-          <query>index=nginx source="/var/log/nginx/error.log" OR sourcetype=nginx:plus:kv $host$ | timechart  count(status) span=1m by status usenull=f</query>
+          <query>index=nginx source="/var/log/nginx/error.log" OR sourcetype=nginx:plus:kv $host$ $site$ | timechart  count(status) span=1m by status usenull=f</query>
           <earliest>$nginx-date-time-range.earliest$</earliest>
           <latest>$nginx-date-time-range.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -156,7 +167,7 @@ showcount=f showperc=f
       <title>Traffic by IP</title>
       <chart>
         <search>
-          <query>index=nginx $host$ sourcetype=nginx:plus:kv OR source="/var/log/nginx/error.log" | top limit=20 src</query>
+          <query>index=nginx $host$ sourcetype=nginx:plus:kv OR source="/var/log/nginx/error.log" $site$ | top limit=20 src</query>
           <earliest>$nginx-date-time-range.earliest$</earliest>
           <latest>$nginx-date-time-range.latest$</latest>
           <sampleRatio>1</sampleRatio>
@@ -193,7 +204,7 @@ showcount=f showperc=f
       <title>Activity by HTTP Method</title>
       <chart>
         <search>
-          <query>sourcetype=nginx:plus:kv OR sourcetype=nginx:plus:access $host$ | timechart count by http_method</query>
+          <query>sourcetype=nginx:plus:kv OR sourcetype=nginx:plus:access $host$ $site$ | timechart count by http_method</query>
           <earliest>$nginx-date-time-range.earliest$</earliest>
           <latest>$nginx-date-time-range.latest$</latest>
         </search>
@@ -228,7 +239,7 @@ showcount=f showperc=f
       <title>3xx Redirection</title>
       <table>
         <search>
-          <query>index=nginx $host$ sourcetype="nginx:plus:kv" status="3*" | stats count(status) as "Count" by status | rename status as "Redirection"</query>
+          <query>index=nginx $host$ sourcetype="nginx:plus:kv" status="3*" $site$ | stats count(status) as "Count" by status | rename status as "Redirection"</query>
           <earliest>$nginx-date-time-range.earliest$</earliest>
           <latest>$nginx-date-time-range.latest$</latest>
         </search>
@@ -245,14 +256,14 @@ showcount=f showperc=f
       <title>4xx Client Errors</title>
       <table>
         <search>
-          <query>index=nginx $host$ sourcetype="nginx:plus:kv" status="4*" | stats count(status) as Count by status | rename status as "Client errors"</query>
+          <query>index=nginx $host$ sourcetype="nginx:plus:kv" status="4*" $site$ | stats count(status) as Count by status | rename status as "Client errors"</query>
           <earliest>$nginx-date-time-range.earliest$</earliest>
           <latest>$nginx-date-time-range.latest$</latest>
         </search>
         <option name="wrap">true</option>
         <option name="rowNumbers">false</option>
         <option name="dataOverlayMode">none</option>
-        <option name="drilldown">cell</option>
+       <option name="drilldown">cell</option>
         <option name="count">10</option>
       </table>
     </panel>
@@ -262,7 +273,7 @@ showcount=f showperc=f
       <title>5xx Server Errors</title>
       <table>
         <search>
-          <query>index=nginx $host$ sourcetype="nginx:plus:kv" status="5*" | stats count(status) as Count by status | rename status as "Server errors"</query>
+          <query>index=nginx $host$ sourcetype="nginx:plus:kv" status="5*" $site$ | stats count(status) as Count by status | rename status as "Server errors"</query>
           <earliest>$nginx-date-time-range.earliest$</earliest>
           <latest>$nginx-date-time-range.latest$</latest>
           <sampleRatio>1</sampleRatio>
