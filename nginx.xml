@@ -1,5 +1,5 @@
-<form>
-  <label>nginx</label>
+<dashboard>
+  <label>Nginx</label>
   <fieldset submitButton="false">
     <input type="time" token="nginx-date-time-range">
       <label>Time Range</label>
@@ -287,4 +287,4 @@
       </table>
     </panel>
   </row>
-</form>
+</dashboard>

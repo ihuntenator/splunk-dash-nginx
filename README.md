@@ -1,9 +1,8 @@
 # splunk-dash-nginx
 
-1. paste in for dashboard
-2. splunk source nginx:plus:kv
-3. want access.log in this format:
+## access.log format
 
+Configure nginx to have the access.log format as follows:
 
 ```
 log_format new  'time_local="$time_local" protocol="$server_protocol" status="$status" '
@@ -18,3 +17,11 @@ log_format new  'time_local="$time_local" protocol="$server_protocol" status="$s
 
     access_log  /var/log/nginx/access.log  new;
 ```
+
+## splunk dashboard setup
+
+1. At splunk create a new dashboard
+2. Give title of Nginx, create
+3. Click source tab 
+4. Paste  in the contents of splunk source nginx.xml
+
